@@ -34,14 +34,13 @@
     <h2>Mevduat Getiri ve Karşılaştırma Aracı</h2>
     <div class="subtitle">Boşta Kalan Tutar ve Günlük Bileşik Faiz Hesaplanarak Kurgulanmıştır</div>
     
+    <!-- En Üstte Mevduat Tutarı -->
     <div class="section">
-        <label for="anapara">Toplam Anapara (TL)</label>
+        <label for="anapara">Toplam Anapara (Mevduat Tutarı - TL)</label>
         <input type="text" id="anapara" placeholder="Örn: 500.000" oninput="formatInput(this)">
-        
-        <label for="vadeGun">Karşılaştırılacak Vade Süresi (Gün)</label>
-        <input type="number" id="vadeGun" placeholder="Örn: 32" min="1" max="365">
     </div>
 
+    <!-- Seçenek 1: Günlük Hesaplama Kutusu -->
     <div class="section">
         <h3>Seçenek 1: Günlük Hesap</h3>
         <label for="gunlukOran">Brüt Faiz Oranı (%)</label>
@@ -51,16 +50,22 @@
         <input type="text" id="bostaKalan" placeholder="Örn: 20.000" oninput="formatInput(this)">
     </div>
 
+    <!-- Seçenek 2: Normal Klasik Vadeli Hesaplama Kutusu -->
     <div class="section">
         <h3>Seçenek 2: Klasik Vadeli Hesap</h3>
         <label for="duzOran">Brüt Faiz Oranı (%)</label>
         <input type="number" id="duzOran" step="0.1" placeholder="Örn: 42">
+
+        <label for="vadeGun">Vade Gün Sayısı</label>
+        <input type="number" id="vadeGun" placeholder="Örn: 32" min="1" max="365">
     </div>
 
+    <!-- Karşılaştırma Kutusu/Butonu -->
     <div class="btn-container">
         <button onclick="hesapla()">Getirileri Karşılaştır</button>
     </div>
 
+    <!-- Sonuç Alanı -->
     <div id="resultBox" class="results">
         <h3 id="resultTitle" style="border:none; margin-bottom:10px;">Sonuç</h3>
         <p id="dailyResultText"></p>
@@ -69,8 +74,9 @@
         <p id="comparisonText" style="font-weight: bold; font-size: 17px; margin-bottom:0;"></p>
     </div>
 
+    <!-- Sadece Güvenilir Bankacı Görünen X Bağlantısı -->
     <div class="footer">
-        Geliştirici: <a href="https://x.com/kurtayfun" target="_blank">Güvenilir Bankacı @kurtayfun</a>
+        Geliştirici: <a href="https://x.com/kurtayfun" target="_blank">Güvenilir Bankacı</a>
     </div>
 </div>
 
@@ -108,7 +114,7 @@ function hesapla() {
 
     const stopaj = 0.175; 
 
-    // 1. Günlük Hesap (Kullanıcının Girdiği Gün Sayısı Kadar Bileşik)
+    // 1. Günlük Hesap (Bileşik)
     let bilesikAnapara = anapara;
     for (let i = 0; i < vadeGun; i++) {
         let nemalanan = bilesikAnapara - bostaKalan;
@@ -120,7 +126,7 @@ function hesapla() {
     }
     const gunlukNetKazanc = bilesikAnapara - anapara;
 
-    // 2. Klasik Vadeli Hesap (Dinamik Gün Süreli)
+    // 2. Klasik Vadeli Hesap
     const duzBrutKazanc = (anapara * duzOran * vadeGun) / 36500;
     const duzNetKazanc = duzBrutKazanc * (1 - stopaj);
 
