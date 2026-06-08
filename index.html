@@ -37,6 +37,9 @@
     <div class="section">
         <label for="anapara">Toplam Anapara (TL)</label>
         <input type="text" id="anapara" placeholder="Örn: 500.000" oninput="formatInput(this)">
+        
+        <label for="vadeGun">Karşılaştırılacak Vade Süresi (Gün)</label>
+        <input type="number" id="vadeGun" placeholder="Örn: 32" min="1" max="365">
     </div>
 
     <div class="section">
@@ -49,7 +52,7 @@
     </div>
 
     <div class="section">
-        <h3>Seçenek 2: Düz 32 Günlük</h3>
+        <h3>Seçenek 2: Klasik Vadeli Hesap</h3>
         <label for="duzOran">Brüt Faiz Oranı (%)</label>
         <input type="number" id="duzOran" step="0.1" placeholder="Örn: 42">
     </div>
@@ -88,18 +91,24 @@ function getRawValue(id) {
 
 function hesapla() {
     const anapara = getRawValue('anapara');
+    const vadeGun = parseInt(document.getElementById('vadeGun').value);
     const gunlukOran = parseFloat(document.getElementById('gunlukOran').value);
     const bostaKalan = getRawValue('bostaKalan');
     const duzOran = parseFloat(document.getElementById('duzOran').value);
     
-    if (isNaN(anapara) || isNaN(gunlukOran) || isNaN(bostaKalan) || isNaN(duzOran)) {
+    if (isNaN(anapara) || isNaN(vadeGun) || isNaN(gunlukOran) || isNaN(bostaKalan) || isNaN(duzOran)) {
         alert("Lütfen tüm alanları eksiksiz doldurun.");
         return;
     }
 
-    const stopaj = 0.175; 
-    const vadeGun = 32;
+    if (vadeGun < 1) {
+        alert("Vade süresi en az 1 gün olmalıdır.");
+        return;
+    }
 
+    const stopaj = 0.175; 
+
+    // 1. Günlük Hesap (Kullanıcının Girdiği Gün Sayısı Kadar Bileşik)
     let bilesikAnapara = anapara;
     for (let i = 0; i < vadeGun; i++) {
         let nemalanan = bilesikAnapara - bostaKalan;
@@ -111,6 +120,7 @@ function hesapla() {
     }
     const gunlukNetKazanc = bilesikAnapara - anapara;
 
+    // 2. Klasik Vadeli Hesap (Dinamik Gün Süreli)
     const duzBrutKazanc = (anapara * duzOran * vadeGun) / 36500;
     const duzNetKazanc = duzBrutKazanc * (1 - stopaj);
 
@@ -120,19 +130,19 @@ function hesapla() {
     const classicResultText = document.getElementById('classicResultText');
     const comparisonText = document.getElementById('comparisonText');
 
-    dailyResultText.innerText = `Günlük Hesap (32 Günlük Bileşik Toplam): ${gunlukNetKazanc.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} TL net getiri.`;
-    classicResultText.innerText = `Klasik 32 Günlük Hesap: ${duzNetKazanc.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} TL net getiri.`;
+    dailyResultText.innerText = `Günlük Hesap (${vadeGun} Günlük Bileşik Toplam): ${gunlukNetKazanc.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} TL net getiri.`;
+    classicResultText.innerText = `Klasik ${vadeGun} Günlük Hesap: ${duzNetKazanc.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} TL net getiri.`;
 
     const fark = Math.abs(gunlukNetKazanc - duzNetKazanc).toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
     if (gunlukNetKazanc > duzNetKazanc) {
         resultBox.className = "results winner-daily";
         resultTitle.innerText = "🏆 Günlük Hesap Daha Avantajlı!";
-        comparisonText.innerText = `Günlük hesabı seçerseniz 32 gün sonunda ${fark} TL daha fazla kazanacaksınız.`;
+        comparisonText.innerText = `Günlük hesabı seçerseniz ${vadeGun} gün sonunda ${fark} TL daha fazla kazanacaksınız.`;
     } else if (duzNetKazanc > gunlukNetKazanc) {
         resultBox.className = "results winner-classic";
-        resultTitle.innerText = "🏆 Klasik 32 Günlük Vadeli Daha Avantajlı!";
-        comparisonText.innerText = `Klasik vadeli hesabı seçerseniz 32 gün sonunda ${fark} TL daha fazla kazanacaksınız.`;
+        resultTitle.innerText = `🏆 Klasik ${vadeGun} Günlük Vadeli Daha Avantajlı!`;
+        comparisonText.innerText = `Klasik vadeli hesabı seçerseniz ${vadeGun} gün sonunda ${fark} TL daha fazla kazanacaksınız.`;
     } else {
         resultBox.className = "results";
         resultTitle.innerText = "Berabere!";
