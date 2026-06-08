@@ -15,3 +15,4 @@ Vade sonunda tek seferde hesaplanır:
 - Toplam Net Getiri = Toplam Brüt Getiri * (1 - 0.175)
 
 ---
+
